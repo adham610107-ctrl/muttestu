@@ -208,12 +208,25 @@ async function authenticateUser() {
     const keygenVal = document.getElementById('auth-keygen').value.trim();
     const errorEl   = document.getElementById('auth-error');
     const btn       = document.getElementById('btn-auth');
+    
     if (!loginVal||!passVal) { errorEl.innerText="Login va Parol majburiy!"; errorEl.classList.remove('hidden'); return; }
-    btn.innerText="Tekshirilmoqda..."; btn.disabled=true; errorEl.classList.add('hidden');
+    
+    btn.innerText="Tekshirilmoqda..."; 
+    btn.disabled=true; 
+    errorEl.classList.add('hidden');
+    
     try {
         const deviceId = await getOrCreateDeviceId();
-        const r = await fetch(GOOGLE_SCRIPT_URL, { method:'POST', body: JSON.stringify({login:loginVal,password:passVal,keygen:keygenVal,deviceId}) });
+        
+        // SHU QATORGA HEADERS QO'SHILDI (Tugma qotib qolmasligi uchun)
+        const r = await fetch(GOOGLE_SCRIPT_URL, { 
+            method:'POST', 
+            headers: { 'Content-Type': 'text/plain' }, 
+            body: JSON.stringify({login:loginVal,password:passVal,keygen:keygenVal,deviceId}) 
+        });
+        
         const result = await r.json();
+        
         if (result.success) {
             localStorage.setItem('pro_exam_auth','true');
             localStorage.setItem('pro_exam_name', result.name||loginVal);
@@ -221,10 +234,19 @@ async function authenticateUser() {
             sendLog('login', {login:loginVal,deviceId});
             switchScreen('auth-screen','welcome-screen');
             startBlockCheck(); startHeartbeat();
-        } else { errorEl.innerText=result.message||"Xato ma'lumotlar!"; errorEl.classList.remove('hidden'); }
-    } catch(e) { errorEl.innerText="Tarmoqda xatolik. Internetni tekshiring."; errorEl.classList.remove('hidden'); }
-    finally { btn.innerText="Kirish · Tasdiqlash"; btn.disabled=false; }
+        } else { 
+            errorEl.innerText=result.message||"Xato ma'lumotlar!"; 
+            errorEl.classList.remove('hidden'); 
+        }
+    } catch(e) { 
+        errorEl.innerText="Tarmoqda xatolik. Internetni tekshiring."; 
+        errorEl.classList.remove('hidden'); 
+    } finally { 
+        btn.innerText="Kirish · Tasdiqlash"; 
+        btn.disabled=false; 
+    }
 }
+
 
 // ===== AUDIO & PARTICLES =====
 const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
@@ -234,7 +256,52 @@ function playFeedback(type) {
     osc.connect(gain); gain.connect(audioCtx.destination);
     if (type==='correct') {
         osc.type='sine'; osc.frequency.setValueAtTime(600,audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200,audioCtx.currentTime+0.12);
-        gain.gain.setValueAtTime(0.28,audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+0.12);
+        gain.gain.setValueAtTime(0.28,audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01,audioCtx.current// ===== AUTH =====
+async function authenticateUser() {
+    const loginVal  = document.getElementById('auth-login').value.trim();
+    const passVal   = document.getElementById('auth-password').value.trim();
+    const keygenVal = document.getElementById('auth-keygen').value.trim();
+    const errorEl   = document.getElementById('auth-error');
+    const btn       = document.getElementById('btn-auth');
+    
+    if (!loginVal||!passVal) { errorEl.innerText="Login va Parol majburiy!"; errorEl.classList.remove('hidden'); return; }
+    
+    btn.innerText="Tekshirilmoqda..."; 
+    btn.disabled=true; 
+    errorEl.classList.add('hidden');
+    
+    try {
+        const deviceId = await getOrCreateDeviceId();
+        
+        // SHU QATORGA HEADERS QO'SHILDI (Tugma qotib qolmasligi uchun)
+        const r = await fetch(GOOGLE_SCRIPT_URL, { 
+            method:'POST', 
+            headers: { 'Content-Type': 'text/plain' }, 
+            body: JSON.stringify({login:loginVal,password:passVal,keygen:keygenVal,deviceId}) 
+        });
+        
+        const result = await r.json();
+        
+        if (result.success) {
+            localStorage.setItem('pro_exam_auth','true');
+            localStorage.setItem('pro_exam_name', result.name||loginVal);
+            document.getElementById('student-name').value = result.name||loginVal;
+            sendLog('login', {login:loginVal,deviceId});
+            switchScreen('auth-screen','welcome-screen');
+            startBlockCheck(); startHeartbeat();
+        } else { 
+            errorEl.innerText=result.message||"Xato ma'lumotlar!"; 
+            errorEl.classList.remove('hidden'); 
+        }
+    } catch(e) { 
+        errorEl.innerText="Tarmoqda xatolik. Internetni tekshiring."; 
+        errorEl.classList.remove('hidden'); 
+    } finally { 
+        btn.innerText="Kirish · Tasdiqlash"; 
+        btn.disabled=false; 
+    }
+}
+Time+0.12);
         osc.start(); osc.stop(audioCtx.currentTime+0.12); if("vibrate"in navigator)navigator.vibrate(50);
     } else {
         osc.type='sawtooth'; osc.frequency.setValueAtTime(280,audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(90,audioCtx.currentTime+0.22);
